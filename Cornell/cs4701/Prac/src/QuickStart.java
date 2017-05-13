@@ -60,6 +60,7 @@ public class QuickStart {
 		return actions;
 	}
 	
+	
 	public static Key rand_key(){
 		Key r = new Key();
 		int i = (int) (Math.random()*256);
