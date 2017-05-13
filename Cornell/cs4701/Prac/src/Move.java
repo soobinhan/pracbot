@@ -1,19 +1,21 @@
+import java.util.LinkedList;
+
 import structs.Key;
 
 public class Move {
 	
-	private Key key;
+	private LinkedList<Key> action;
 	private State state;
 	private int result;
 	
-	public Move(Key k, State s){
-		key = k;
+	public Move(LinkedList<Key> a, State s){
+		action = a;
 		state = s;
 		result = 0;
 	}
 	
-	public Key get_key(){
-		return key;
+	public LinkedList<Key> get_action(){
+		return action;
 	}
 	
 	public State get_state(){
