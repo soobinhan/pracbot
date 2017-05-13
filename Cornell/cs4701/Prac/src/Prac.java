@@ -11,6 +11,7 @@ import java.util.Queue;
 
 import javax.activation.MailcapCommandMap;
 
+import commandcenter.CommandCenter;
 import enumerate.Action;
 import fighting.Attack;
 import gameInterface.AIInterface;
@@ -22,7 +23,7 @@ public class Prac implements AIInterface {
 	private Key inputKey;
 	private boolean player;
 	private FrameData frameData;
-	private LinkedList<Move> actions = new LinkedList<Move>();
+	//private LinkedList<Move> actions = new LinkedList<Move>();
 
 	private FrameData base_fd;
 	private Simulator simulator;
@@ -33,6 +34,7 @@ public class Prac implements AIInterface {
 	private FrameData fd_to_be_flushed;      // to be recorded to knn
 	private boolean action_ended;            // indicates first frame after action ended
 	private Deque<Action> to_exec;           // actions to be executed
+	private CommandCenter cmd;
 
 	@Override
 	public void close() {
@@ -54,6 +56,7 @@ public class Prac implements AIInterface {
 		this.simulator = new Simulator(gd);
 		this.knn = new kNN(this.player);
 		this.action_ended = true;
+		cmd = new CommandCenter();
 		Toolkit.set_up_actions();
 		return 0;
 	}
@@ -62,11 +65,6 @@ public class Prac implements AIInterface {
 	public void getInformation(FrameData frameData) {
 		// TODO Auto-generated method stub
 		this.frameData = frameData;
-		if(!frameData.getEmptyFlag()){
-			State s = new State(frameData,player);
-			Move m = check_results(s);
-			if(m!=null) System.out.println(m.get_result());
-		}
 
 		if (this.frameData.getFrameNumber() % 10 == 0){
 			// At the 10th frame
@@ -114,10 +112,12 @@ public class Prac implements AIInterface {
 
 		Action curr;
 		//DQ
-		if(actions.peek()==null){
+		if(to_exec.peek()==null){
+			action_ended = true;
 			return new Key();
 		}
-		curr = actions.poll();
+		action_ended = false;
+		curr = to_exec.poll();
 		//map act -> key
 		cmd.commandCall(curr.toString());
 		inputKey = cmd.getSkillKey();
@@ -127,21 +127,6 @@ public class Prac implements AIInterface {
 	}
 
 	//UTILITY FUNCTIONS
-
-	public Move check_results(State s){
-		Move m = actions.peek();
-		if (m==null) return null;
-		//if it has been 20 frames since the move was performed
-		if(m.get_state().get_frame() < s.get_frame() - 20){
-			m = actions.removeLast();
-			int nethp = 0;
-			nethp =(s.get_hp() - m.get_state().get_hp())
-					- (s.get_opp_hp() - m.get_state().get_opp_hp());
-			if (nethp > 0) m.set_result(1);
-			else if (nethp < 0) m.set_result(-1);
-		}
-		return m;
-	}
 
 	public int net_HP_change(FrameData fd_before, FrameData fd_after){
 		int delta_my = fd_after.getMyCharacter(player).getHp() -
@@ -168,30 +153,6 @@ public class Prac implements AIInterface {
 		}
 
 		return best_action;
-	}
-
-	public boolean is_empty_key(Key k){
-		if(k==null) return true;
-		if(k.A || k.B || k.C || k.D || k.L || k.R || k.U) {
-			//System.out.println("non empty key");
-			return false;
-		}
-		return true;
-	}
-
-	public boolean is_same_key(Key k, Key k2){
-		if(k==null||k2==null){
-			return true;
-		}
-		if(k.A == k2.A && k.B == k2.B && k.C == k2.C
-				&& k.D == k2.D && k.L == k2.L && k.R == k2.R && k.U == k2.U ){
-			return true;
-		}
-		return false;
-	}
-
-	public void add_to_action_queue(LinkedList a){
-		key_queue.addAll(a);
 	}
 
 }
