@@ -46,6 +46,19 @@ public class Prac implements AIInterface {
 	}
 
 	@Override
+	public int initialize(GameData gd, boolean player) {
+		// TODO Auto-generated method stub
+		this.inputKey = new Key();
+		this.player = player;
+		this.frameData = new FrameData();
+		this.simulator = new Simulator(gd);
+		this.knn = new kNN(this.player);
+		this.action_ended = true;
+		Toolkit.set_up_actions();
+		return 0;
+	}
+
+	@Override
 	public void getInformation(FrameData frameData) {
 		// TODO Auto-generated method stub
 		this.frameData = frameData;
@@ -54,7 +67,7 @@ public class Prac implements AIInterface {
 			Move m = check_results(s);
 			if(m!=null) System.out.println(m.get_result());
 		}
-		
+
 		if (this.frameData.getFrameNumber() % 10 == 0){
 			// At the 10th frame
 			this.knn.record(fd_to_be_flushed, act_to_be_flushed); // record the deq of actions
@@ -69,49 +82,48 @@ public class Prac implements AIInterface {
 		}
 	}
 
-	@Override
-	public int initialize(GameData gd, boolean player) {
-		// TODO Auto-generated method stub
-		this.inputKey = new Key();
-		this.player = player;
-		this.frameData = new FrameData();
-		this.simulator = new Simulator(gd);
-		this.knn = new kNN(this.player);
-		this.action_ended = true;
-		return 0;
-	}
-
-	@Override
-	public Key input() {
-		// TODO Auto-generated method stub
-		return inputKey;
-	}
-
 	@SuppressWarnings("deprecation")
 	@Override
 	public void processing() {
-		
+
 		if(!frameData.getEmptyFlag() && frameData.getRemainingTime() > 0){
 			State state = new State(frameData,player);
-			
-			
+
+
 			if(this.knn.isReady()){ // knn is ready to roll
 				if(action_ended){ // Action executed
 					action_ended = false;
 					// Predict opp action
 					Deque<Action> opp_act = knn.getNearest(state);
 					// Construct potential actions
-					Deque<Action>[] potential_actions;
+					Deque<Action>[] potential_actions = Toolkit.get_options();
 					to_exec = tree_search(potential_actions, opp_act, frameData);
 				}
-				
+
 			}else{ // knn isn't hot yet
 //				LinkedList plan = QuickStart.decision(state);
 //				if(plan!=null) add_to_action_queue(plan);
-//				
-				
+//
+
 			}
 		}
+	}
+
+	@Override
+	public Key input() {
+
+		Action curr;
+		//DQ
+		if(actions.peek()==null){
+			return new Key();
+		}
+		curr = actions.poll();
+		//map act -> key
+		cmd.commandCall(curr.toString());
+		inputKey = cmd.getSkillKey();
+		//return key
+
+		return inputKey;
 	}
 
 	//UTILITY FUNCTIONS
@@ -123,29 +135,29 @@ public class Prac implements AIInterface {
 		if(m.get_state().get_frame() < s.get_frame() - 20){
 			m = actions.removeLast();
 			int nethp = 0;
-			nethp =(s.get_hp() - m.get_state().get_hp()) 
+			nethp =(s.get_hp() - m.get_state().get_hp())
 					- (s.get_opp_hp() - m.get_state().get_opp_hp());
 			if (nethp > 0) m.set_result(1);
 			else if (nethp < 0) m.set_result(-1);
 		}
 		return m;
 	}
-	
+
 	public int net_HP_change(FrameData fd_before, FrameData fd_after){
-		int delta_my = fd_after.getMyCharacter(player).getHp() - 
+		int delta_my = fd_after.getMyCharacter(player).getHp() -
 				fd_before.getMyCharacter(player).getHp();
-		int delta_opp = fd_after.getOpponentCharacter(player).getHp() - 
+		int delta_opp = fd_after.getOpponentCharacter(player).getHp() -
 				fd_before.getOpponentCharacter(player).getHp();
 		return delta_my - delta_opp;
 	}
-	
+
 	public Deque<Action> tree_search(Deque<Action>[] act_list, Deque<Action> opp_act, FrameData cur_fd){
-		
+
 		Deque<Action> best_action = null;
 		Integer best_change = null;
 		int cur_change;
 		FrameData sim_fd;
-	
+
 		for (int i = 0; i< act_list.length; i++){
 			sim_fd = simulator.simulate(cur_fd, player, act_list[i], opp_act, simulationLimit);
 			cur_change = net_HP_change(cur_fd, sim_fd);
@@ -154,7 +166,7 @@ public class Prac implements AIInterface {
 				best_action = act_list[i];
 			}
 		}
-		
+
 		return best_action;
 	}
 
