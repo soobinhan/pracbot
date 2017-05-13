@@ -1,5 +1,7 @@
+import structs.FrameData;
 import structs.Key;
 
+import java.util.Deque;
 import java.util.LinkedList;
 
 import enumerate.Action;
@@ -11,53 +13,31 @@ public class QuickStart {
 	 * so that it doesn't flounder early on before the KNN is populated with data.
 	 */
 	
-	public static LinkedList<Key> decision(State s){
-		LinkedList<Key> actions = new LinkedList<Key>();
-		Key key = new Key();
-		System.out.println(s.get_opp_stat());
-		switch(s.get_opp_stat()){
+	public static Deque<Action> decision(FrameData f, boolean player, Deque<Action>[] options){
+		structs.CharacterData me = f.getMyCharacter(player);
+		structs.CharacterData opp = f.getOpponentCharacter(player);
+		Deque<Action> result = new LinkedList<Action>();
+		switch(opp.getAction()){
 			case AIR:
 			case FOR_JUMP:
 			{
-				key.D = true;
-				actions.add(key);
-				for(int i=0;i<19;i++){
-					actions.add(key);
-				}
-				Key key2 = new Key();
-				key2.A = true;
-				key2.D = true;
-				key2.L = (s.get_front()>0) ? false : true;
-				key2.R = (s.get_front()>0) ? true : false;
-				actions.add(key2);
-				break;
+				return options[1];
 			}
 			case FORWARD_WALK:
 			{
-				key.L = (s.get_front()>0) ? false : true;
-				key.R = (s.get_front()>0) ? true : false;
-				actions.add(key);
-				for(int i=0;i<2;i++){
-					actions.add(new Key());
-				}
-				Key key2 = new Key();
-				key2.B = true;
-				key2.D = true;
-				key2.L = (s.get_front()>0) ? false : true;
-				key2.R = (s.get_front()>0) ? true : false;
-				actions.add(key2);
-				break;
+				return options[0];
 			}
+			case STAND_A:
+			case STAND_B:
+			case CROUCH_A:
+			case CROUCH_B:
+				return options[3];
+			case STAND:
+				if(me.energy>25) 
+					return options[2];
 			default:
-				if(s.get_my_stat()==Action.CROUCH){
-					actions.add(new Key());
-					return actions;
-				}
-				if(s.get_my_stat()!= Action.STAND){
-					return null;
-				}
+				return options[4];
 		}
-		return actions;
 	}
 	
 	

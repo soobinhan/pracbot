@@ -99,9 +99,7 @@ public class Prac implements AIInterface {
 				}
 
 			}else{ // knn isn't hot yet
-//				LinkedList plan = QuickStart.decision(state);
-//				if(plan!=null) add_to_action_queue(plan);
-//
+				to_exec = QuickStart.decision(frameData, player, Toolkit.get_options());
 
 			}
 		}
