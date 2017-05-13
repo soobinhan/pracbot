@@ -19,6 +19,7 @@ public class Prac implements AIInterface {
 	private boolean player;
 	private FrameData frameData;
 	private LinkedList<Move> actions = new LinkedList<Move>();
+	private LinkedList<Key> key_queue = new LinkedList<Key>();
 
 
 	@Override
@@ -55,35 +56,37 @@ public class Prac implements AIInterface {
 	@Override
 	public Key input() {
 		// TODO Auto-generated method stub
-		if(!frameData.getEmptyFlag()){
-			State state = new State(frameData,player);
-			Move currMove = new Move(inputKey,state);
-			if(!is_empty_key(inputKey)){
-				actions.add(currMove);
-			}
-		}
 		return inputKey;
 	}
 
 	@Override
 	public void processing() {
 		// TODO Auto-generated method stub
-		inputKey = rand_key();
-		/*if(!frameData.getEmptyFlag()){
-			inputKey = frameData.getKeyData().getOpponentKey(player);
-			//inputKey.R = inputKey.R ? false : true;
-			//inputKey.L = inputKey.L ? false : true;
-		}*/
+		if(!frameData.getEmptyFlag()){
+			State state = new State(frameData,player);
+			//while knn is readying up
+			if(key_queue.size()==0){
+				LinkedList plan = QuickStart.decision(state);
+				if(plan!=null) add_to_action_queue(plan);
+			}else{
+				inputKey = key_queue.poll();
+			}
+			//
+			Move currMove = new Move(inputKey,state);
+			if(!is_empty_key(inputKey)){
+				actions.add(currMove);
+			}
+		}	
 	}
 
 	//UTILITY FUNCTIONS
-	
+
 	public Move check_results(State s){
 		Move m = actions.peek();
 		if (m==null) return null;
 		//if it has been 20 frames since the move was performed
 		if(m.get_state().get_frame() < s.get_frame() - 20){
-			m = actions.poll();
+			m = actions.removeLast();
 			int nethp = 0;
 			nethp =(s.get_hp() - m.get_state().get_hp()) 
 					- (s.get_opp_hp() - m.get_state().get_opp_hp());
@@ -92,7 +95,7 @@ public class Prac implements AIInterface {
 		}
 		return m;
 	}
-	
+
 	public boolean is_empty_key(Key k){
 		if(k==null) return true;
 		if(k.A || k.B || k.C || k.D || k.L || k.R || k.U) {
@@ -101,7 +104,7 @@ public class Prac implements AIInterface {
 		}
 		return true;
 	}
-	
+
 	public boolean is_same_key(Key k, Key k2){
 		if(k==null||k2==null){
 			return true;
@@ -112,22 +115,12 @@ public class Prac implements AIInterface {
 		}
 		return false;
 	}
-	
-	public Key rand_key(){
-		Key r = new Key();
-		int i = (int) (Math.random()*256);
-		String s = Integer.toBinaryString(i);
-		String f = ("00000000" + s).substring(s.length());
-		System.out.println(f);
-		r.A = (Character.getNumericValue(f.charAt(1)) > 0);
-		r.B = (Character.getNumericValue(f.charAt(2)) > 0);
-		r.C = (Character.getNumericValue(f.charAt(3)) > 0);
-		r.D = (Character.getNumericValue(f.charAt(4)) > 0);
-		r.L = (Character.getNumericValue(f.charAt(5)) > 0);
-		r.R = (Character.getNumericValue(f.charAt(6)) > 0);
-		r.U = (Character.getNumericValue(f.charAt(7)) > 0);
-		return r;
+
+	public void add_to_action_queue(LinkedList a){
+		key_queue.addAll(a);
 	}
+
+
 
 
 }
