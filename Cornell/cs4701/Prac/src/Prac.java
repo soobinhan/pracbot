@@ -18,16 +18,22 @@ import simulator.Simulator;
 
 
 public class Prac implements AIInterface {
-	
+
 	private Key inputKey;
 	private boolean player;
 	private FrameData frameData;
 	private LinkedList<Move> actions = new LinkedList<Move>();
-	
+
 	private FrameData base_fd;
 	private Simulator simulator;
 	private int simulationLimit = 20;
-	
+	private LinkedList<Key> key_queue = new LinkedList<Key>();
+	private kNN knn;                         // knn
+	private Deque<Action> act_to_be_flushed; // to be recorded to knn
+	private FrameData fd_to_be_flushed;      // to be recorded to knn
+	private boolean action_ended;            // indicates first frame after action ended
+	private Deque<Action> to_exec;           // actions to be executed
+
 	@Override
 	public void close() {
 		// TODO Auto-generated method stub
@@ -43,12 +49,23 @@ public class Prac implements AIInterface {
 	public void getInformation(FrameData frameData) {
 		// TODO Auto-generated method stub
 		this.frameData = frameData;
-		try{
+		if(!frameData.getEmptyFlag()){
 			State s = new State(frameData,player);
 			Move m = check_results(s);
-			System.out.println(m.get_result());
-		}catch(Exception e){
-			System.out.println("Could not fetch framedata");
+			if(m!=null) System.out.println(m.get_result());
+		}
+		
+		if (this.frameData.getFrameNumber() % 10 == 0){
+			// At the 10th frame
+			this.knn.record(fd_to_be_flushed, act_to_be_flushed); // record the deq of actions
+			this.act_to_be_flushed = new LinkedList<Action>(); // reset action to be flushed
+			fd_to_be_flushed = null; // reset fd to be flushed
+		}else{
+			// Other frames
+			if(fd_to_be_flushed == null){
+				fd_to_be_flushed = frameData; // begin collecting
+			}
+			this.act_to_be_flushed.push(frameData.getOpponentCharacter(player).getAction());
 		}
 	}
 
@@ -59,40 +76,52 @@ public class Prac implements AIInterface {
 		this.player = player;
 		this.frameData = new FrameData();
 		this.simulator = new Simulator(gd);
+		this.knn = new kNN(this.player);
+		this.action_ended = true;
 		return 0;
 	}
 
 	@Override
 	public Key input() {
 		// TODO Auto-generated method stub
-		try{
-		State state = new State(frameData,player);
-		Move currMove = new Move(inputKey,state);
-		actions.add(currMove);
-		}catch(Exception e){
-			System.out.println("could not fetch frameData");
-		}
 		return inputKey;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void processing() {
-		// TODO Auto-generated method stub
-		//create the environment vector
 		
-		if(!frameData.getEmptyFlag()){
-			inputKey = frameData.getKeyData().getOpponentKey(player);
-			inputKey.R = inputKey.R ? false : true;
-			inputKey.L = inputKey.L ? false : true;
+		if(!frameData.getEmptyFlag() && frameData.getRemainingTime() > 0){
+			State state = new State(frameData,player);
+			
+			
+			if(this.knn.isReady()){ // knn is ready to roll
+				if(action_ended){ // Action executed
+					action_ended = false;
+					// Predict opp action
+					Deque<Action> opp_act = knn.getNearest(state);
+					// Construct potential actions
+					Deque<Action>[] potential_actions;
+					to_exec = tree_search(potential_actions, opp_act, frameData);
+				}
+				
+			}else{ // knn isn't hot yet
+//				LinkedList plan = QuickStart.decision(state);
+//				if(plan!=null) add_to_action_queue(plan);
+//				
+				
+			}
 		}
 	}
-	
+
+	//UTILITY FUNCTIONS
+
 	public Move check_results(State s){
 		Move m = actions.peek();
 		if (m==null) return null;
 		//if it has been 20 frames since the move was performed
 		if(m.get_state().get_frame() < s.get_frame() - 20){
-			m = actions.poll();
+			m = actions.removeLast();
 			int nethp = 0;
 			nethp =(s.get_hp() - m.get_state().get_hp()) 
 					- (s.get_opp_hp() - m.get_state().get_opp_hp());
@@ -128,6 +157,29 @@ public class Prac implements AIInterface {
 		
 		return best_action;
 	}
-	
+
+	public boolean is_empty_key(Key k){
+		if(k==null) return true;
+		if(k.A || k.B || k.C || k.D || k.L || k.R || k.U) {
+			//System.out.println("non empty key");
+			return false;
+		}
+		return true;
+	}
+
+	public boolean is_same_key(Key k, Key k2){
+		if(k==null||k2==null){
+			return true;
+		}
+		if(k.A == k2.A && k.B == k2.B && k.C == k2.C
+				&& k.D == k2.D && k.L == k2.L && k.R == k2.R && k.U == k2.U ){
+			return true;
+		}
+		return false;
+	}
+
+	public void add_to_action_queue(LinkedList a){
+		key_queue.addAll(a);
+	}
 
 }

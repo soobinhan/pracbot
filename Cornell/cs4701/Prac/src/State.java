@@ -14,6 +14,7 @@ import fighting.Attack;
 public class State {
 	
 	private int frame;
+	private int front;
 	private int dist;
 	private int hp;
 	private int opphp;
@@ -25,15 +26,20 @@ public class State {
 		CharacterData me = in.getMyCharacter(player);
 		CharacterData opp = in.getOpponentCharacter(player);
 		frame = in.getFrameNumber();
+		front = me.front ? 1 : 0;
 		dist = Math.abs(me.getGraphicCenterX() - opp.getGraphicCenterX());
 		hp = me.getHp();
 		opphp = opp.getHp();
 		mystat = me.getAction();
-		oppstat = me.getAction();
+		oppstat = opp.getAction();
 	}	
 	
 	public int get_frame(){
 		return frame;
+	}
+	
+	public int get_front(){
+		return front;
 	}
 	
 	public int get_dist(){
@@ -62,13 +68,14 @@ public class State {
 	 * frame,distance,hp,opponent hp, action hash code, opp action hashcode
 	 */
 	public int[] to_arr(){
-		int[] env = new int[6];
+		int[] env = new int[7];
 		env[0] = frame;
-		env[1] = dist;
-		env[2] = hp;
-		env[3] = opphp;
-		env[4] = mystat.hashCode();
-		env[5] = oppstat.hashCode();
+		env[1] = front;
+		env[2] = dist;
+		env[3] = hp;
+		env[4] = opphp;
+		env[5] = mystat.hashCode();
+		env[6] = oppstat.hashCode();
 		return env;
 	}
 
