@@ -23,7 +23,7 @@ public class Prac implements AIInterface {
 	private Key inputKey;
 	private boolean player;
 	private FrameData frameData;
-	private LinkedList<Move> actions = new LinkedList<Move>();
+	//private LinkedList<Move> actions = new LinkedList<Move>();
 
 	private FrameData base_fd;
 	private Simulator simulator;
@@ -58,6 +58,7 @@ public class Prac implements AIInterface {
 		this.action_ended = true;
 		this.cmd = new CommandCenter();
 		Toolkit.set_up_actions();
+		System.out.println("I am aliveeee");
 		return 0;
 	}
 
@@ -65,11 +66,6 @@ public class Prac implements AIInterface {
 	public void getInformation(FrameData frameData) {
 		// TODO Auto-generated method stub
 		this.frameData = frameData;
-		if(!frameData.getEmptyFlag()){
-			State s = new State(frameData,player);
-			Move m = check_results(s);
-			if(m!=null) System.out.println(m.get_result());
-		}
 
 		if (this.frameData.getFrameNumber() % 10 == 0){
 			// At the 10th frame
@@ -101,9 +97,8 @@ public class Prac implements AIInterface {
 					to_exec = tree_search(potential_actions, opp_act, frameData);
 				}
 
-			}else{
-
-
+			}else{ // knn isn't hot yet
+				to_exec = QuickStart.decision(frameData, player, Toolkit.get_options());
 
 			}
 		}
@@ -114,10 +109,12 @@ public class Prac implements AIInterface {
 
 		Action curr;
 		//DQ
-		if(actions.peek()==null){
+		if(to_exec.peek()==null){
+			action_ended = true;
 			return new Key();
 		}
-		curr = actions.poll();
+		action_ended = false;
+		curr = to_exec.poll();
 		//map act -> key
 		cmd.commandCall(curr.toString());
 		inputKey = cmd.getSkillKey();
@@ -127,21 +124,6 @@ public class Prac implements AIInterface {
 	}
 
 	//UTILITY FUNCTIONS
-
-	public Move check_results(State s){
-		Move m = actions.peek();
-		if (m==null) return null;
-		//if it has been 20 frames since the move was performed
-		if(m.get_state().get_frame() < s.get_frame() - 20){
-			m = actions.removeLast();
-			int nethp = 0;
-			nethp =(s.get_hp() - m.get_state().get_hp())
-					- (s.get_opp_hp() - m.get_state().get_opp_hp());
-			if (nethp > 0) m.set_result(1);
-			else if (nethp < 0) m.set_result(-1);
-		}
-		return m;
-	}
 
 	public int net_HP_change(FrameData fd_before, FrameData fd_after){
 		int delta_my = fd_after.getMyCharacter(player).getHp() -
