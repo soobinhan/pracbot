@@ -58,6 +58,8 @@ public class Prac implements AIInterface {
 		this.action_ended = true;
 		this.cmd = new CommandCenter();
 		Toolkit.set_up_actions();
+		this.act_to_be_flushed = new LinkedList<Action>();
+		this.fd_to_be_flushed = null;
 		System.out.println("I am aliveeee");
 		return 0;
 	}
@@ -66,18 +68,22 @@ public class Prac implements AIInterface {
 	public void getInformation(FrameData frameData) {
 		// TODO Auto-generated method stub
 		this.frameData = frameData;
-
-		if (this.frameData.getFrameNumber() % 10 == 0){
-			// At the 10th frame
-			this.knn.record(fd_to_be_flushed, act_to_be_flushed); // record the deq of actions
-			this.act_to_be_flushed = new LinkedList<Action>(); // reset action to be flushed
-			fd_to_be_flushed = null; // reset fd to be flushed
-		}else{
-			// Other frames
-			if(fd_to_be_flushed == null){
-				fd_to_be_flushed = frameData; // begin collecting
+		this.cmd.setFrameData(frameData, player);
+		if(!frameData.getEmptyFlag()){
+			if (fd_to_be_flushed != null && act_to_be_flushed !=  null 
+					&& this.frameData.getFrameNumber() % 10 == 0){
+				// At the 10th frame
+				try{this.knn.record(fd_to_be_flushed, act_to_be_flushed);} // record the deq of actions
+				catch(Exception e){}
+				this.act_to_be_flushed = new LinkedList<Action>(); // reset action to be flushed
+				fd_to_be_flushed = null; // reset fd to be flushed
+			}else{
+				// Other frames
+				if(fd_to_be_flushed == null){
+					fd_to_be_flushed = frameData; // begin collecting
+				}
+				this.act_to_be_flushed.push(frameData.getOpponentCharacter(player).getAction());
 			}
-			this.act_to_be_flushed.push(frameData.getOpponentCharacter(player).getAction());
 		}
 	}
 
@@ -109,14 +115,17 @@ public class Prac implements AIInterface {
 
 		Action curr;
 		//DQ
-		if(to_exec.peek()==null){
+		if(to_exec == null || to_exec.peek()==null){
 			action_ended = true;
 			return new Key();
 		}
 		action_ended = false;
 		curr = to_exec.poll();
 		//map act -> key
-		cmd.commandCall(curr.toString());
+		System.out.println(curr == null);
+		System.out.println(curr.name());
+		System.out.println(cmd==null);
+		cmd.commandCall(curr.name());
 		inputKey = cmd.getSkillKey();
 		//return key
 

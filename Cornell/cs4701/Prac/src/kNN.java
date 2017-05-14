@@ -1,5 +1,6 @@
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import enumerate.Action;
 import structs.FrameData;
@@ -10,11 +11,13 @@ public class kNN {
 	final int sim_threshold = 100;
 	final int size_limit = 3000;
 	boolean player;
+	int toggled;
 
 	public kNN(boolean player){
-		this.data = null;
+		this.data = new LinkedList<Tuple>();
 		this.size = 0;
 		this.player = player;
+		this.toggled = 0;
 	}
 
 	public boolean isReady(){
@@ -34,6 +37,11 @@ public class kNN {
 	}
 
 	public Deque<Action> getNearest(FrameData s){
+		
+		if(toggled == 0){
+			System.out.println("KNN activated");
+			toggled++;
+		}
 		double[] scores = new double[this.size];
 		Iterator<Tuple> it = data.iterator();
 		Tuple cur_tuple;
@@ -49,10 +57,24 @@ public class kNN {
 				max_moves = cur_tuple.opp_act;
 			}
 		}
+		print_actions(max_moves);
 		return max_moves;
 	}
+	
+	public void print_actions(Deque<Action> acts){
 
-	public void record(FrameData fd, Deque<Action> a){
+		Iterator<Action> it = acts.iterator();
+		Action ptr = it.next();
+		while(ptr != null){
+			System.out.println(ptr.name());
+		}
+		
+	}
+
+	public void record(FrameData fd, Deque<Action> a) throws Exception{
+		if(a == null){
+			throw new Exception();
+		}
 		this.data.push(new Tuple(fd, a));
 		this.size++;
 	}
