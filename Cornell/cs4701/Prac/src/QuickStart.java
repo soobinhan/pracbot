@@ -2,6 +2,7 @@ import structs.FrameData;
 import structs.Key;
 
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import enumerate.Action;
@@ -16,7 +17,6 @@ public class QuickStart {
 	public static Deque<Action> decision(FrameData f, boolean player, Deque<Action>[] options){
 		structs.CharacterData me = f.getMyCharacter(player);
 		structs.CharacterData opp = f.getOpponentCharacter(player);
-		Deque<Action> result = new LinkedList<Action>();
 		switch(opp.getAction()){
 			case AIR:
 			case FOR_JUMP:
@@ -31,13 +31,24 @@ public class QuickStart {
 			case STAND_B:
 			case CROUCH_A:
 			case CROUCH_B:
-				return options[3];
+				return options[4];
 			case STAND:
 				if(me.energy>25) 
 					return options[2];
 			default:
-				return options[4];
+				return options[3];
 		}
+	}
+	
+	public static Deque<Action> copy_deque(Deque<Action> acts){
+		Deque<Action> copy = new LinkedList<Action>();
+
+		Iterator<Action> it = acts.iterator();
+		Action ptr = it.next();
+		while(ptr != null){
+			copy.add(ptr);
+		}
+		return copy;
 	}
 	
 	

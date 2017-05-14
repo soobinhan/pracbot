@@ -90,7 +90,7 @@ public class Prac implements AIInterface {
 	@SuppressWarnings("deprecation")
 	@Override
 	public void processing() {
-
+		
 		if(!frameData.getEmptyFlag() && frameData.getRemainingTime() > 0){
 
 			if(this.knn.isReady()){ // knn is ready to roll
@@ -104,7 +104,10 @@ public class Prac implements AIInterface {
 				}
 
 			}else{ // knn isn't hot yet
-				to_exec = QuickStart.decision(frameData, player, Toolkit.get_options());
+				if(action_ended){
+					action_ended = false;
+					to_exec = QuickStart.decision(frameData, player, Toolkit.get_options());
+				}
 
 			}
 		}
@@ -112,19 +115,16 @@ public class Prac implements AIInterface {
 
 	@Override
 	public Key input() {
-
+		
 		Action curr;
 		//DQ
 		if(to_exec == null || to_exec.peek()==null){
 			action_ended = true;
 			return new Key();
 		}
-		action_ended = false;
-		curr = to_exec.poll();
+		curr = to_exec.peek();
+		to_exec = null;
 		//map act -> key
-		System.out.println(curr == null);
-		System.out.println(curr.name());
-		System.out.println(cmd==null);
 		cmd.commandCall(curr.name());
 		inputKey = cmd.getSkillKey();
 		//return key
