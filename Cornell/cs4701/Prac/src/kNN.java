@@ -33,7 +33,7 @@ public class kNN {
 										   f1.getMyCharacter(player).left);
 		int relY_f2 = Math.abs(f1.getMyCharacter(player).bottom -
 											 f1.getMyCharacter(player).bottom);
-		return Math.sqrt(Math.pow(relX_f2-relX_f1, 2) + Math.pow(relY_f2 - relY_f1, 2));
+		return -Math.sqrt(Math.pow(relX_f2-relX_f1, 2) + Math.pow(relY_f2 - relY_f1, 2));
 	}
 
 	public Deque<Action> getNearest(FrameData s){
@@ -45,36 +45,34 @@ public class kNN {
 		double[] scores = new double[this.size];
 		Iterator<Tuple> it = data.iterator();
 		Tuple cur_tuple;
-		double max = 0;
+		Double max = null;
 		Deque<Action> max_moves = null;
 
 		for(int i = 0; i < this.size; i++){
 			cur_tuple = it.next();
 			scores[i] = computeSim(s, cur_tuple.fd);
 
-			if (scores[i] > max){
+			if (max == null || scores[i] > max){
 				max = scores[i];
 				max_moves = cur_tuple.opp_act;
 			}
 		}
-		print_actions(max_moves);
 		return max_moves;
 	}
 	
 	public void print_actions(Deque<Action> acts){
-
+		System.out.println(acts == null);
 		Iterator<Action> it = acts.iterator();
 		Action ptr = it.next();
 		while(ptr != null){
 			System.out.println(ptr.name());
+			ptr = it.next();
 		}
 		
 	}
 
 	public void record(FrameData fd, Deque<Action> a) throws Exception{
-		if(a == null){
-			throw new Exception();
-		}
+		if(a == null){System.out.println("adding null action");}
 		this.data.push(new Tuple(fd, a));
 		this.size++;
 	}
