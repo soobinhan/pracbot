@@ -57,12 +57,12 @@ public class kNN {
 				max_moves = cur_tuple.opp_act;
 			}
 		}
-		print_actions(max_moves);
+		// print_actions(max_moves);
 		return max_moves;
 	}
 	
 	public void print_actions(Deque<Action> acts){
-
+		System.out.println(acts == null);
 		Iterator<Action> it = acts.iterator();
 		Action ptr = it.next();
 		while(ptr != null){
@@ -72,9 +72,9 @@ public class kNN {
 	}
 
 	public void record(FrameData fd, Deque<Action> a) throws Exception{
-		if(a == null){
-			throw new Exception();
-		}
+		System.out.println("Recording===================");
+		print_actions(a);
+		System.out.println("============================");
 		this.data.push(new Tuple(fd, a));
 		this.size++;
 	}
