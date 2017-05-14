@@ -24,32 +24,20 @@ public class QuickStart {
 				return options[1];
 			}
 			case FORWARD_WALK:
-			{
-				return options[0];
-			}
 			case STAND_A:
 			case STAND_B:
 			case CROUCH_A:
 			case CROUCH_B:
-				return options[4];
+				return options[0];
 			case STAND:
 				if(me.energy>25) 
 					return options[2];
+				else return options[4];
 			default:
 				return options[3];
 		}
 	}
-	
-	public static Deque<Action> copy_deque(Deque<Action> acts){
-		Deque<Action> copy = new LinkedList<Action>();
 
-		Iterator<Action> it = acts.iterator();
-		Action ptr = it.next();
-		while(ptr != null){
-			copy.add(ptr);
-		}
-		return copy;
-	}
 	
 	
 	public static Key rand_key(){

@@ -2,6 +2,8 @@ import structs.FrameData;
 import structs.GameData;
 import structs.Key;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -93,7 +95,7 @@ public class Prac implements AIInterface {
 		
 		if(!frameData.getEmptyFlag() && frameData.getRemainingTime() > 0){
 
-			if(this.knn.isReady()){ // knn is ready to roll
+			if(false && this.knn.isReady()){ // knn is ready to roll
 				if(action_ended){ // Action executed
 					action_ended = false;
 					// Predict opp action
@@ -106,7 +108,10 @@ public class Prac implements AIInterface {
 			}else{ // knn isn't hot yet
 				if(action_ended){
 					action_ended = false;
-					to_exec = QuickStart.decision(frameData, player, Toolkit.get_options());
+					Deque<Action> copy = new LinkedList<Action>();
+					copy.addAll(QuickStart.decision(frameData, player, Toolkit.get_options()));
+					 to_exec = copy;
+					
 				}
 
 			}
@@ -122,8 +127,8 @@ public class Prac implements AIInterface {
 			action_ended = true;
 			return new Key();
 		}
-		curr = to_exec.peek();
-		to_exec = null;
+		if(!frameData.getMyCharacter(player).control) return new Key();
+		curr = to_exec.poll();
 		//map act -> key
 		cmd.commandCall(curr.name());
 		inputKey = cmd.getSkillKey();
@@ -157,7 +162,7 @@ public class Prac implements AIInterface {
 				best_action = act_list[i];
 			}
 		}
-
 		return best_action;
 	}
+	
 }

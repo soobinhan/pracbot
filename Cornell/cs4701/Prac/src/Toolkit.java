@@ -49,15 +49,13 @@ public class Toolkit {
 		Deque<Action> mash_jab = new LinkedList<Action>();
 		mash_jab.add(Action.STAND_A);
 		
-		
 		options[3] = mash_jab;
 		//
 		
 		//good old block spamming
 		Deque<Action> block = new LinkedList<Action>();
 		block.add(Action.STAND_GUARD);
-		
-		
+	
 		options[4] = block;
 		
 		
