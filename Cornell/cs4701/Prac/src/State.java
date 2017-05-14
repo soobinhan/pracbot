@@ -12,7 +12,7 @@ import enumerate.Action;
 import fighting.Attack;
 
 public class State {
-	
+
 	private int frame;
 	private int front;
 	private int dist;
@@ -22,6 +22,7 @@ public class State {
 	private Action mystat;
 	private Action oppstat;
 	
+
 	public State(FrameData in, boolean player){
 		CharacterData me = in.getMyCharacter(player);
 		CharacterData opp = in.getOpponentCharacter(player);
@@ -32,36 +33,36 @@ public class State {
 		opphp = opp.getHp();
 		mystat = me.getAction();
 		oppstat = opp.getAction();
-	}	
-	
+	}
+
 	public int get_frame(){
 		return frame;
 	}
-	
+
 	public int get_front(){
 		return front;
 	}
-	
+
 	public int get_dist(){
 		return dist;
 	}
-	
+
 	public int get_hp(){
 		return hp;
 	}
-	
+
 	public int get_opp_hp(){
 		return opphp;
 	}
-	
+
 	public Action get_my_stat(){
 		return mystat;
 	}
-	
+
 	public Action get_opp_stat(){
 		return oppstat;
 	}
-	
+
 	/*
 	 * [int[]] to_arr takes in a State s and returns an array
 	 * with the information of s represented as follows:

@@ -5,7 +5,7 @@ import enumerate.Action;
 
 public class Toolkit {
 	
-	private Deque<Action>[] options;
+	private static Deque<Action>[] options;
 	/*
 	 * The options are as follows:
 	 * 0: block_and_sweep
@@ -16,7 +16,7 @@ public class Toolkit {
 	 */
 	
 	//Initializer function for all of the actions in the toolkit
-	public void set_up_actions(){
+	public static void set_up_actions(){
 		options = new LinkedList[5];
 		
 		//classic block and sweep maneouver
@@ -70,7 +70,7 @@ public class Toolkit {
 		
 	}
 	
-	public Deque<Action>[] get_options(){
+	public static Deque<Action>[] get_options(){
 		return options;
 	}
 	

@@ -11,6 +11,7 @@ import java.util.Queue;
 
 import javax.activation.MailcapCommandMap;
 
+import commandcenter.CommandCenter;
 import enumerate.Action;
 import fighting.Attack;
 import gameInterface.AIInterface;
@@ -33,6 +34,7 @@ public class Prac implements AIInterface {
 	private FrameData fd_to_be_flushed;      // to be recorded to knn
 	private boolean action_ended;            // indicates first frame after action ended
 	private Deque<Action> to_exec;           // actions to be executed
+	private CommandCenter cmd;
 
 	@Override
 	public void close() {
@@ -54,6 +56,7 @@ public class Prac implements AIInterface {
 		this.simulator = new Simulator(gd);
 		this.knn = new kNN(this.player);
 		this.action_ended = true;
+		this.cmd = new CommandCenter();
 		Toolkit.set_up_actions();
 		return 0;
 	}
@@ -87,23 +90,20 @@ public class Prac implements AIInterface {
 	public void processing() {
 
 		if(!frameData.getEmptyFlag() && frameData.getRemainingTime() > 0){
-			State state = new State(frameData,player);
-
 
 			if(this.knn.isReady()){ // knn is ready to roll
 				if(action_ended){ // Action executed
 					action_ended = false;
 					// Predict opp action
-					Deque<Action> opp_act = knn.getNearest(state);
+					Deque<Action> opp_act = knn.getNearest(frameData);
 					// Construct potential actions
 					Deque<Action>[] potential_actions = Toolkit.get_options();
 					to_exec = tree_search(potential_actions, opp_act, frameData);
 				}
 
-			}else{ // knn isn't hot yet
-//				LinkedList plan = QuickStart.decision(state);
-//				if(plan!=null) add_to_action_queue(plan);
-//
+			}else{
+
+
 
 			}
 		}
@@ -169,29 +169,4 @@ public class Prac implements AIInterface {
 
 		return best_action;
 	}
-
-	public boolean is_empty_key(Key k){
-		if(k==null) return true;
-		if(k.A || k.B || k.C || k.D || k.L || k.R || k.U) {
-			//System.out.println("non empty key");
-			return false;
-		}
-		return true;
-	}
-
-	public boolean is_same_key(Key k, Key k2){
-		if(k==null||k2==null){
-			return true;
-		}
-		if(k.A == k2.A && k.B == k2.B && k.C == k2.C
-				&& k.D == k2.D && k.L == k2.L && k.R == k2.R && k.U == k2.U ){
-			return true;
-		}
-		return false;
-	}
-
-	public void add_to_action_queue(LinkedList a){
-		key_queue.addAll(a);
-	}
-
 }
