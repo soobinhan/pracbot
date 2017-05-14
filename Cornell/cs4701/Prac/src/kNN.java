@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.stream.DoubleStream;
 
 import enumerate.Action;
 import structs.FrameData;
@@ -41,20 +42,22 @@ public class kNN {
 		return -Math.sqrt(Math.pow(relX_f2-relX_f1, 2) + Math.pow(relY_f2 - relY_f1, 2));
 	}
 	
-	static int[] argsort(double[] orig, int nummax) {
-        double[] copy = Arrays.copyOf(orig,orig.length);
-        Arrays.sort(copy);
-        double[] honey = Arrays.copyOfRange(copy,copy.length - nummax, copy.length);
-        int[] result = new int[nummax];
-        int resultPos = 0;
-        for(int i = 0; i < orig.length; i++) {
-            double onTrial = orig[i];
-            int index = Arrays.binarySearch(honey,onTrial);
-            if(index < 0) continue;
-            result[resultPos++] = i;
-        }
-        return result;
-	}
+	public Integer[] argsort( final double[] a )
+    {
+        Integer[] idx = new Integer[ a.length ];
+        for ( int i = 0 ; i < a.length ; i++ )
+        	idx[ i ] = new Integer( i );
+        Arrays.sort
+        ( idx, new Comparator<Integer>()
+	        {
+			    @Override public int compare( final Integer i1, final Integer i2)
+			    {
+			        return Double.compare( a[ i1 ], a[ i2 ] );
+			    }
+		    }
+	    );
+	    return idx;
+    }
 	
 	public Deque<Action> getNearest(FrameData s){
 		
@@ -76,8 +79,8 @@ public class kNN {
 //				max_moves = cur_tuple.opp_act;
 //			}
 		}
-		
-		int[] argsorted = argsort(scores, k);
+
+		Integer[] argsorted = argsort(scores);
 		double[] sorted = new double[k];
 		double sum = 0;
 		for (int i = 0; i < k; i++){
