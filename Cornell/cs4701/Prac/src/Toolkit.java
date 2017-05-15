@@ -21,7 +21,9 @@ public class Toolkit {
 		
 		//classic block and sweep maneouver
 		Deque<Action> block_and_sweep = new LinkedList<Action>();
-		block_and_sweep.add(Action.CROUCH_GUARD);
+		for(int i=0;i<3;i++){
+			block_and_sweep.add(Action.STAND_GUARD);
+		}
 		block_and_sweep.add(Action.CROUCH_FB);
 		
 		options[0] = block_and_sweep;
@@ -30,7 +32,6 @@ public class Toolkit {
 		//classic anti air punch
 		
 		Deque<Action> anti_air = new LinkedList<Action>();
-		anti_air.add(Action.STAND);
 		anti_air.add(Action.CROUCH_FA);
 		
 		options[1] = anti_air;
@@ -54,7 +55,7 @@ public class Toolkit {
 		
 		//good old block spamming
 		Deque<Action> block = new LinkedList<Action>();
-		block.add(Action.STAND_GUARD);
+		block.add(Action.NEUTRAL);
 	
 		options[4] = block;
 		

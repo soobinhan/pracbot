@@ -29,7 +29,7 @@ public class Prac implements AIInterface {
 
 	private FrameData base_fd;
 	private Simulator simulator;
-	private int simulationLimit = 20;
+	private int simulationLimit = 120;
 	private LinkedList<Key> key_queue = new LinkedList<Key>();
 	private kNN knn;                         // knn
 	private Deque<Action> act_to_be_flushed; // to be recorded to knn
@@ -95,14 +95,16 @@ public class Prac implements AIInterface {
 		
 		if(!frameData.getEmptyFlag() && frameData.getRemainingTime() > 0){
 
-			if(false && this.knn.isReady()){ // knn is ready to roll
+			if(this.knn.isReady()){ // knn is ready to roll
 				if(action_ended){ // Action executed
 					action_ended = false;
 					// Predict opp action
 					Deque<Action> opp_act = knn.getNearest(frameData);
 					// Construct potential actions
 					Deque<Action>[] potential_actions = Toolkit.get_options();
-					to_exec = tree_search(potential_actions, opp_act, frameData);
+					Deque<Action> copy = new LinkedList<Action>();
+					copy.addAll(tree_search(potential_actions, opp_act, frameData));
+					to_exec = copy;
 				}
 
 			}else{ // knn isn't hot yet
@@ -120,7 +122,7 @@ public class Prac implements AIInterface {
 
 	@Override
 	public Key input() {
-		
+		if(frameData.getEmptyFlag()) return new Key();
 		Action curr;
 		//DQ
 		if(to_exec == null || to_exec.peek()==null){
